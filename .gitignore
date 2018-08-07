@@ -4,6 +4,8 @@ test.py
 *.sh
 *.sh.*
 models/*
+*.blend
+*.blend*
 
 
 # Byte-compiled / optimized / DLL files
