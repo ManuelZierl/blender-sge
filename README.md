@@ -11,3 +11,14 @@ or for example:
    python gridrender.py video test.blend 0 100
    
 This would render your test.blend file from frame 0 to 100
+______________________________________________________________________________________________________________
+
+Render a single frame split up in multiple Sun-Grid Jobs. The Image is seperated in a Raster. The syntax of the command:
+
+   python gridrender.py image [file] [frame] [horizontal_splits] [vertical_splits]
+   
+or for example:
+   
+   python gridrender.py image test.blend 0 4 4
+
+This would render the frame 0 of the test.blend file split up to 16 jobs
