@@ -62,7 +62,7 @@ if sys.argv[1] == "image":
         while vertical_step <= 1:
 
             with open("r_" + str(i) + "_" + str(j) + ".sh", "w") as text_file:
-                text_file.write("blender -b untitled.blend --python render_box.py -- "   + str((horizontal_step - 1.0/int(sys.argv[4]))) + " "
+                text_file.write("blender -b " + file + " --python render_box.py -- "   + str((horizontal_step - 1.0/int(sys.argv[4]))) + " "
                                                                                    + str(horizontal_step) + " "
                                                                                    + str((vertical_step - 1.0 / int(sys.argv[5]))) + " "
                                                                                    + str(vertical_step) + " "
