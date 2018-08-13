@@ -53,21 +53,21 @@ if sys.argv[1] == "image":
     file = sys.argv[2]
     frame = int(sys.argv[3])
 
-    horizontal_step, vertical_step = 1.0/int(sys.argv[4]), 1.0/int(sys.argv[5])
+    horizontal_step, vertical_step = 1.0 / int(sys.argv[4]), 1.0 / int(sys.argv[5])
     i = 0
     j = 0
     filelist = []
     while horizontal_step <= 1:
         vertical_step = 1.0 / int(sys.argv[5])
         while vertical_step <= 1:
-
             with open("r_" + str(i) + "_" + str(j) + ".sh", "w") as text_file:
-                text_file.write("blender -b " + file + " --python render_box.py -- "   + str((horizontal_step - 1.0/int(sys.argv[4]))) + " "
-                                                                                   + str(horizontal_step) + " "
-                                                                                   + str((vertical_step - 1.0 / int(sys.argv[5]))) + " "
-                                                                                   + str(vertical_step) + " "
-                                                                                   + str(frame) + " "
-                                                                                   + file[0:len(file) - 6])
+                text_file.write("blender -b " + file + " --python render_box.py -- " + str(
+                    (horizontal_step - 1.0 / int(sys.argv[4]))) + " "
+                                + str(horizontal_step) + " "
+                                + str((vertical_step - 1.0 / int(sys.argv[5]))) + " "
+                                + str(vertical_step) + " "
+                                + str(frame) + " "
+                                + file[0:len(file) - 6])
 
             filelist.append("r_" + str(i) + "_" + str(j) + ".sh")
             j += 1
@@ -75,10 +75,13 @@ if sys.argv[1] == "image":
         i += 1
         horizontal_step += 1.0 / int(sys.argv[4])
 
+    try:
+        os.makedirs("render/" + file[0:len(file) - 6])
+    except:
+        pass
 
     for f in filelist:
         os.system("qsub -V -b n -cwd " + f)
-        call(["qsub", "-V", "-b", "n", "-cwd", f])
 
     # ...
     time.sleep(1)
@@ -86,3 +89,12 @@ if sys.argv[1] == "image":
     # Loesche Jobs
     for f in filelist:
         os.remove(f)
+
+    with open("render/" + file[0:len(file) - 6] + "/finalize.py", "w") as text_file:
+        string = 'import glob' + '\n' + 'from PIL import Image' + '\n' + 'files = []' +\
+                 '\n' + 'for file in glob.glob("*.png"):' + '\n' + ' files.append(file)' +\
+                 '\n' + 'img = Image.open(files[0])' + '\n' + 'for i in range(1, len(files)):' + \
+                 '\n' + ' add = Image.open(files[i])' + '\n' + ' img.paste(add, (0, 0), add)' +\
+                 '\n' + 'img.save("'+ file[0:len(file) - 6] + '.png")' + '\n'
+
+        text_file.write(string)

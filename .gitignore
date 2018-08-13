@@ -6,6 +6,7 @@ test.py
 models/*
 *.blend
 *.blend*
+render/
 
 
 # Byte-compiled / optimized / DLL files
