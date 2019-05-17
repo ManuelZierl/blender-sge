@@ -25,7 +25,7 @@ if sys.argv[1] == "video":
             text_file.write("#!/bin/bash \n")
             text_file.write("#SBATCH --partition=All \n")
             text_file.write("#SBATCH --job-name=blender-render \n")
-            text_file.write("#SBATCH --output=console_output.txt \n")
+            text_file.write("#SBATCH --output=" + name + "_log.txt \n")
             text_file.write("blender -b " + file + " -x 1 -o //render/" + name + "/ -f " + str(i))
 
         filelist.append("r" + n + ".sh")
@@ -40,21 +40,17 @@ if sys.argv[1] == "video":
     for f in filelist:
         call(["sbatch", f])
 
-    # ...
     time.sleep(1)
 
-    # Loesche Jobs
-    # for f in filelist:
-    #     os.remove(f)
+    for f in filelist:
+        os.remove(f)
 
     with open("render/" + name + "/finalize.py", "w") as text_file:
         string = 'from subprocess import call' + '\n' + 'call(["ffmpeg", "-r", "25", "-i", "%04d.png", "-vb", "20M", "-vcodec", "mpeg4", "-y", "movie.mp4"])'
         text_file.write(string)
 
-# syntax python gridrender.py image [file] [frame] [horizontal_splits] [vertical_splits]
+# syntax python slurmrender.py image [file] [frame] [horizontal_splits] [vertical_splits]
 if sys.argv[1] == "image":
-    if True:
-        raise Exception("this funciton is not yet implemented")
     # todo: ...
     file = sys.argv[2]
     frame = int(sys.argv[3])
@@ -67,6 +63,10 @@ if sys.argv[1] == "image":
         vertical_step = 1.0 / int(sys.argv[5])
         while vertical_step <= 1:
             with open("r_" + str(i) + "_" + str(j) + ".sh", "w") as text_file:
+                text_file.write("#!/bin/bash \n")
+                text_file.write("#SBATCH --partition=All \n")
+                text_file.write("#SBATCH --job-name=blend \n")
+                text_file.write("#SBATCH --output=log.txt \n")
                 text_file.write("blender -b " + file + " --python render_box.py -- " + str(
                     (horizontal_step - 1.0 / int(sys.argv[4]))) + " "
                                 + str(horizontal_step) + " "
@@ -87,7 +87,7 @@ if sys.argv[1] == "image":
         pass
 
     for f in filelist:
-        os.system("qsub -V -b n -cwd " + f)
+        call(["sbatch", f])
 
     # ...
     time.sleep(1)
@@ -97,10 +97,10 @@ if sys.argv[1] == "image":
         os.remove(f)
 
     with open("render/" + file[0:len(file) - 6] + "/finalize.py", "w") as text_file:
-        string = 'import glob' + '\n' + 'from PIL import Image' + '\n' + 'files = []' +\
-                 '\n' + 'for file in glob.glob("*.png"):' + '\n' + ' files.append(file)' +\
+        string = 'import glob' + '\n' + 'from PIL import Image' + '\n' + 'files = []' + \
+                 '\n' + 'for file in glob.glob("*.png"):' + '\n' + ' files.append(file)' + \
                  '\n' + 'img = Image.open(files[0])' + '\n' + 'for i in range(1, len(files)):' + \
-                 '\n' + ' add = Image.open(files[i])' + '\n' + ' img.paste(add, (0, 0), add)' +\
-                 '\n' + 'img.save("'+ file[0:len(file) - 6] + '.png")' + '\n'
+                 '\n' + ' add = Image.open(files[i])' + '\n' + ' img.paste(add, (0, 0), add)' + \
+                 '\n' + 'img.save("' + file[0:len(file) - 6] + '.png")' + '\n'
 
         text_file.write(string)
